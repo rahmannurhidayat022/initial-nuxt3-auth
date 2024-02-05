@@ -20,3 +20,8 @@ export interface User {
 }
 
 export type UserWithoutPassword = Omit<User, "password">;
+
+export interface FormLogin {
+	email: string;
+	password: string;
+}

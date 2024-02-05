@@ -24,14 +24,17 @@ export const useAuth = () => {
 
 	const login = async (email: string, password: string) => {
 		try {
-			const res: RequestResponse = await $fetch("/app/auth/login", {
+			const loginToken: RequestResponse = await $fetch("/app/login");
+			const res: RequestResponse = await $fetch("/app/login", {
 				method: "POST",
-				body: { email, password },
+				body: { email, password, token: loginToken.data.token },
 			});
 			if (res.success) {
 				credential.value = res.data.token;
-				await me();
-				navigateTo({ path: "/dashboard" });
+				const user = await me();
+				if (user && user.id_role === 1) navigateTo({ path: "/member" });
+				if (user && user.id_role === 2) navigateTo({ path: "/author" });
+				if (user && user.id_role === 3) navigateTo({ path: "/admin" });
 			}
 		} catch (error) {
 			console.error(error);
@@ -40,14 +43,14 @@ export const useAuth = () => {
 
 	const logout = async () => {
 		try {
-			const res: RequestResponse = await $fetch("/app/auth/logout", {
-				method: "POST",
+			const res: RequestResponse = await $fetch("/app/logout", {
 				headers: {
-					Authorization: `Bearer ${getToken()}`,
+					Authorization: getToken(),
 				},
 			});
 			if (res.success) {
 				setCookie(null);
+				setUser(null);
 				navigateTo({ path: "/login" });
 			}
 		} catch (error) {
@@ -57,7 +60,7 @@ export const useAuth = () => {
 
 	const verify = async (token: string) => {
 		try {
-			const res: RequestResponse = await $fetch(`/app/auth/verify/${token}`, {
+			const res: RequestResponse = await $fetch(`/app/verify/${token}`, {
 				headers: {
 					Authorization: `Bearer ${token}`,
 				},
@@ -71,15 +74,16 @@ export const useAuth = () => {
 		}
 	};
 
-	const me = async (): Promise<void> => {
+	const me = async () => {
 		if (!authUser.value) {
 			try {
-				const res: RequestResponse = await $fetch("/cda/api/users", {
+				const res: RequestResponse = await $fetch("/app/users", {
 					headers: {
 						Authorization: getToken(),
 					},
 				});
 				setUser(res.data);
+				return res.data;
 			} catch (error) {
 				setCookie(null);
 			}

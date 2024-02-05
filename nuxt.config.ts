@@ -19,7 +19,7 @@ export default defineNuxtConfig({
 		routeRules: {
 			"/app/**": {
 				proxy: {
-					to: process.env.API_HOST + "/**",
+					to: process.env.API_HOST + "/api/**",
 				},
 			},
 		},

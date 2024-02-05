@@ -1,11 +1,11 @@
 import { useAuthUser } from "./useAuthUser";
 
-export const useAdmin = () => {
+export const useMember = () => {
 	const authUser = useAuthUser();
 
 	return computed(() => {
 		if (!authUser.value) return false;
 
-		return authUser.value.id_role === 3;
+		return authUser.value.id_role === 1;
 	});
 };
